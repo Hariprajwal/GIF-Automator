@@ -9,6 +9,25 @@ import pyperclip
 import google.generativeai as genai
 from tkinter import Tk, Label, Button, Frame, StringVar, simpledialog
 import sys  # Added for Unix input handling
+import re
+
+def sanitize_filename(name):
+    """
+    Sanitize filename to remove invalid characters and limit length
+    """
+    # Remove invalid characters for Windows filenames
+    invalid_chars = '<>:"/\\|?*'
+    for char in invalid_chars:
+        name = name.replace(char, '')
+    
+    # Limit length to avoid Windows path issues (max 255 chars, but be safe)
+    if len(name) > 100:
+        name = name[:100]
+    
+    # Remove any leading/trailing spaces or dots
+    name = name.strip().strip('.')
+    
+    return name
 
 def download_video_from_url(url):
     """
@@ -133,7 +152,7 @@ def get_input_with_timeout(prompt, timeout=3, default=""):
         return default
 
 class GiphyUploader:
-    def __init__(self, video_title):
+    def __init__(self, video_title, auto_start=False):
         self.root = Tk()
         self.root.title("GIPHY Upload Automation")
         self.root.geometry("500x450")
@@ -155,6 +174,10 @@ class GiphyUploader:
         # Set up pyautogui
         pyautogui.FAILSAFE = True
         pyautogui.PAUSE = 0.5
+        
+        # Auto-start if requested
+        if auto_start:
+            self.root.after(2000, self.start_process)  # Start after 2 seconds
         
     def setup_gemini(self):
         """Configure the Gemini AI for tag generation"""
@@ -325,8 +348,8 @@ class GiphyUploader:
             # Step 3: Click on path input and paste the file path
             self.click_at_position(445, 167, "Clicking on path input")
             
-            # Create folder name from video title
-            folder_name = self.video_title.replace(" ", "_") + "_gifs"
+            # Create folder name from video title (sanitized)
+            folder_name = sanitize_filename(self.video_title.replace(" ", "_") + "_gifs")
             gif_directory = os.path.join(r"C:\Users\harip\ALL TEST", folder_name)
             
             self.update_status(f"Pasting file path: {gif_directory}")
@@ -340,7 +363,7 @@ class GiphyUploader:
             pyautogui.write(self.video_title)
             time.sleep(5)  # Wait as specified
             
-            # UPDATED Step 5: Click at X=376, Y=234 and then press Ctrl+A to select all
+            # Step 5: Click at X=376, Y=234 and then press Ctrl+A to select all
             self.click_at_position(376, 234, "Clicking on file area to focus")
             pyautogui.hotkey('ctrl', 'a')  # Select all files
             time.sleep(1)
@@ -402,8 +425,8 @@ if __name__ == "__main__":
     print("🔄 CONVERTING TO GIFS")
     print("=" * 40)
     
-    # Create folder name from video title
-    folder_name = video_title.replace(" ", "_") + "_gifs"
+    # Create folder name from video title (sanitized)
+    folder_name = sanitize_filename(video_title.replace(" ", "_") + "_gifs")
     final_output_dir = os.path.join(r"C:\Users\harip\ALL TEST", folder_name)
     
     print(f"🎯 Creating GIFs in: {final_output_dir}")
@@ -415,16 +438,24 @@ if __name__ == "__main__":
     print(f"📁 Video downloaded to: {downloaded_video_path}")
     print(f"📁 GIFs saved to: {final_output_dir}")
     
-    # Step 3: Start GIPHY Uploader
+    # Step 3: 10-second cooldown before auto-starting GIPHY uploader
     print("\n" + "=" * 40)
-    print("🚀 STARTING GIPHY UPLOADER")
+    print("🚀 STARTING GIPHY UPLOADER IN 10 SECONDS")
     print("=" * 40)
+    
+    print("⏳ 10-second cooldown before starting automation...")
+    for i in range(10, 0, -1):
+        print(f"⏰ Starting in {i} seconds...")
+        time.sleep(1)
+    
+    print("🎯 Auto-starting GIPHY uploader now!")
     
     # Check if required modules are installed
     try:
         import pyautogui
         import pyperclip
-        app = GiphyUploader(video_title)
+        # Auto-start the upload process
+        app = GiphyUploader(video_title, auto_start=True)
         app.run()
     except ImportError as e:
         print(f"Please install the required modules: pip install pyautogui pyperclip")
