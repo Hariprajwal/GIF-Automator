@@ -1,0 +1,24 @@
+ENSURE ALL THSE MODULES ARE PRESNT IN THE YOUR WORK ENVIORMENT 
+
+import or install all these modules 
+import yt_dlp
+import os
+import math
+import subprocess
+import time
+import webbrowser
+import pyautogui
+import pyperclip
+import google.generativeai as genai
+from tkinter import Tk, Label, Button, Frame, StringVar, simpledialog
+import sys  # Added for Unix input handling
+import re
+
+And use this program to change the coordinates according to your screen :
+
+import pyautogui
+import time
+print("You have 5 seconds to move your mouse to the target location...")
+time.sleep(10)
+x, y = pyautogui.position()
+print(f"Mouse is at: X={x}, Y={y}")
